@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test Tema 9 — Transparencia y Protección de Datos | Opositar en Valencia</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --naranja: #d97706; --naranja-claro: #fef3c7; --naranja-borde: #f59e0b;
+    --azul-oscuro: #1e293b; --texto: #374151; --texto-suave: #6b7280;
+    --borde: #e5e7eb; --fondo: #fafaf9; --blanco: #ffffff;
+    --verde: #166534; --verde-bg: #f0fdf4; --verde-borde: #86efac;
+    --rojo: #991b1b; --rojo-bg: #fef2f2; --rojo-borde: #fca5a5;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Source Sans 3', sans-serif; background: var(--fondo); color: var(--texto); min-height: 100vh; font-size: 16px; line-height: 1.6; }
+  header { background: var(--blanco); border-bottom: 1px solid var(--borde); }
+  .header-top { max-width: 860px; margin: 0 auto; padding: 1.4rem 1.5rem 1rem; display: flex; align-items: flex-start; gap: 1.2rem; }
+  .header-logo { width: 48px; height: 48px; border-radius: 8px; object-fit: contain; flex-shrink: 0; }
+  .header-textos { flex: 1; }
+  .header-site { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--naranja); font-weight: 600; margin-bottom: 3px; }
+  .header-titulo { font-family: 'Lora', serif; font-size: clamp(1.15rem, 3vw, 1.65rem); font-weight: 700; color: var(--azul-oscuro); line-height: 1.2; }
+  .header-sub { font-size: 0.88rem; color: var(--texto-suave); margin-top: 4px; }
+  .header-meta { background: var(--naranja-claro); border-top: 1px solid #fde68a; padding: 0.55rem 1.5rem; }
+  .header-meta-inner { max-width: 860px; margin: 0 auto; display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap; font-size: 0.83rem; color: #92400e; font-weight: 500; }
+  .barra-wrap { position: sticky; top: 0; z-index: 100; background: var(--blanco); border-bottom: 1px solid var(--borde); padding: 0.6rem 1.5rem; box-shadow: 0 1px 6px rgba(0,0,0,0.05); }
+  .barra-inner { max-width: 860px; margin: 0 auto; display: flex; align-items: center; gap: 1rem; }
+  .barra-track { flex: 1; height: 6px; background: #f3f4f6; border-radius: 99px; overflow: hidden; }
+  .barra-fill { height: 100%; background: var(--naranja); border-radius: 99px; transition: width 0.35s ease; width: 0%; }
+  .barra-num { font-size: 13px; font-weight: 600; color: var(--azul-oscuro); white-space: nowrap; min-width: 52px; }
+  .barra-score { font-size: 13px; color: var(--texto-suave); white-space: nowrap; }
+  .barra-score .ok { color: var(--verde); font-weight: 600; }
+  .barra-score .ko { color: var(--rojo); font-weight: 600; }
+  main { max-width: 860px; margin: 0 auto; padding: 2rem 1.5rem 5rem; }
+  .card { background: var(--blanco); border: 1px solid var(--borde); border-radius: 10px; padding: 1.5rem 1.6rem; margin-bottom: 1.4rem; transition: box-shadow 0.2s; }
+  .card:hover { box-shadow: 0 3px 14px rgba(0,0,0,0.06); }
+  .card-num { font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--naranja); margin-bottom: 0.5rem; }
+  .card-pregunta { font-family: 'Lora', serif; font-size: 1rem; font-weight: 600; line-height: 1.55; color: var(--azul-oscuro); margin-bottom: 1.1rem; }
+  .opciones { display: flex; flex-direction: column; gap: 0.45rem; }
+  .opcion { display: flex; align-items: flex-start; gap: 0.7rem; padding: 0.7rem 1rem; border: 1.5px solid var(--borde); border-radius: 7px; cursor: pointer; background: var(--blanco); text-align: left; font-family: 'Source Sans 3', sans-serif; font-size: 0.93rem; color: var(--texto); line-height: 1.5; transition: border-color 0.15s, background 0.15s; width: 100%; }
+  .opcion:hover:not(:disabled) { border-color: var(--naranja-borde); background: var(--naranja-claro); }
+  .opcion .letra { font-weight: 700; color: var(--naranja); min-width: 18px; font-size: 0.85rem; margin-top: 2px; flex-shrink: 0; }
+  .opcion.correcta { border-color: var(--verde-borde); background: var(--verde-bg); color: var(--verde); }
+  .opcion.correcta .letra { color: #15803d; }
+  .opcion.incorrecta { border-color: var(--rojo-borde); background: var(--rojo-bg); color: var(--rojo); }
+  .opcion.incorrecta .letra { color: var(--rojo); }
+  .opcion:disabled { cursor: default; }
+  .explicacion { display: none; margin-top: 1rem; padding: 0.9rem 1rem 0.9rem 1.1rem; background: #fffbeb; border-left: 3px solid var(--naranja); border-radius: 0 6px 6px 0; font-size: 0.875rem; line-height: 1.65; color: var(--texto); }
+  .explicacion.visible { display: block; animation: fadeIn 0.22s ease; }
+  .explicacion strong { color: var(--azul-oscuro); }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+  .resultado { display: none; background: var(--blanco); border: 1px solid var(--borde); border-radius: 12px; padding: 2.5rem 2rem 2rem; margin: 1.5rem 0 2rem; text-align: center; }
+  .resultado.visible { display: block; animation: fadeIn 0.3s ease; }
+  .resultado-eyebrow { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: var(--naranja); font-weight: 600; margin-bottom: 0.5rem; }
+  .resultado h2 { font-family: 'Lora', serif; font-size: 1.75rem; font-weight: 700; color: var(--azul-oscuro); margin-bottom: 0.3rem; }
+  .resultado-nota { font-size: 3.2rem; font-weight: 700; color: var(--azul-oscuro); line-height: 1; margin: 1rem 0 0.3rem; font-family: 'Lora', serif; }
+  .resultado-nota span { color: var(--naranja); }
+  .calif-badge { display: inline-block; padding: 5px 16px; border-radius: 99px; font-size: 0.9rem; font-weight: 600; margin: 0.6rem 0 1.5rem; }
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 0 0 1.5rem; }
+  .stat { background: var(--fondo); border: 1px solid var(--borde); border-radius: 8px; padding: 0.9rem 0.5rem; }
+  .stat-num { font-size: 1.9rem; font-weight: 700; font-family: 'Lora', serif; }
+  .stat-lab { font-size: 0.78rem; color: var(--texto-suave); margin-top: 2px; }
+  .resultado-hint { font-size: 0.85rem; color: var(--texto-suave); margin-bottom: 1.2rem; }
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 0.7rem 1.6rem; border-radius: 7px; font-family: 'Source Sans 3', sans-serif; font-size: 0.95rem; font-weight: 600; cursor: pointer; border: none; transition: all 0.18s; }
+  .btn-naranja { background: var(--naranja); color: white; }
+  .btn-naranja:hover { background: #b45309; transform: translateY(-1px); }
+  @media (max-width: 580px) { main { padding: 1.2rem 1rem 4rem; } .card { padding: 1.1rem; } .stats { grid-template-columns: 1fr 1fr; } .header-top { padding: 1rem; gap: 0.8rem; } .header-meta { padding: 0.5rem 1rem; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <img class="header-logo"
+      src="https://opositorgva.wordpress.com/wp-content/uploads/2024/04/cropped-opositar-en-valencia-logo-sin-fondo.png"
+      alt="Opositar en Valencia" onerror="this.style.display='none'">
+    <div class="header-textos">
+      <div class="header-site">Opositar en Valencia · GVA</div>
+      <div class="header-titulo">Tema 9 — Transparencia y Protección de Datos</div>
+      <div class="header-sub">Ley 19/2013 (Transparencia, acceso a la información) · LO 3/2018 (Protección de Datos)</div>
+    </div>
+  </div>
+  <div class="header-meta">
+    <div class="header-meta-inner">
+      <span id="totalLabel">📋 Cargando...</span>
+      <span>🎯 Nivel medio-alto</span>
+      <span>🔀 Orden aleatorio en cada intento</span>
+      <span>✅ Explicación en cada respuesta</span>
+    </div>
+  </div>
+</header>
+
+<div class="barra-wrap">
+  <div class="barra-inner">
+    <div class="barra-track"><div class="barra-fill" id="barraFill"></div></div>
+    <span class="barra-num" id="barraNum">0 / ?</span>
+    <span class="barra-score"><span class="ok" id="scoreOk">✓ 0</span> &nbsp;<span class="ko" id="scoreKo">✗ 0</span></span>
+  </div>
+</div>
+
+<main id="mainContent"></main>
+
+<script>
+const BANCO = [
+
+  /* ══ LEY 19/2013 — TÍTULO PRELIMINAR ══ */
+  {
+    p: "¿Cuál es el objeto de la Ley 19/2013, de transparencia, acceso a la información pública y buen gobierno, según su artículo 1?",
+    ops: [
+      "Crear el Consejo de Transparencia y Buen Gobierno como organismo regulador único",
+      "Ampliar y reforzar la transparencia de la actividad pública, regular y garantizar el derecho de acceso a la información, y establecer las obligaciones de buen gobierno con sus consecuencias por incumplimiento",
+      "Regular exclusivamente el procedimiento de acceso a archivos y registros administrativos",
+      "Homogeneizar la legislación autonómica en materia de transparencia y buen gobierno"
+    ],
+    c: 1,
+    exp: "<strong>Respuesta correcta: B.</strong> El art. 1 de la Ley 19/2013 establece tres objetivos: «ampliar y reforzar la transparencia de la actividad pública, regular y garantizar el derecho de acceso a la información relativa a aquella actividad y establecer las obligaciones de buen gobierno que deben cumplir los responsables públicos así como las consecuencias derivadas de su incumplimiento»."
+  },
+
+  /* ══ LEY 19/2013 — TÍTULO I, CAP. III, SECCIÓN 1ª ══ */
+  {
+    p: "El artículo 12 de la Ley 19/2013 reconoce el derecho de acceso a la información pública. ¿En qué precepto constitucional se fundamenta?",
+    ops: [
+      "Artículo 20 de la Constitución Española",
+      "Artículo 23 de la Constitución Española",
+      "Artículo 105.b) de la Constitución Española",
+      "Artículo 9.2 de la Constitución Española"
+    ],
+    c: 2,
+    exp: "<strong>Respuesta correcta: C.</strong> El art. 12 establece que «todas las personas tienen derecho a acceder a la información pública, en los términos previstos en el artículo 105.b) de la Constitución Española, desarrollados por esta Ley». El art. 105.b) CE reconoce el acceso de los ciudadanos a archivos y registros administrativos, con las excepciones que la ley establezca."
+  },
+  {
+    p: "¿Cómo define el artículo 13 de la Ley 19/2013 el concepto de «información pública»?",
+    ops: [
+      "Solo los documentos oficiales publicados en diarios oficiales por las Administraciones",
+      "Los contenidos o documentos, cualquiera que sea su formato o soporte, que obren en poder de los sujetos incluidos en el ámbito de aplicación del título y que hayan sido elaborados o adquiridos en el ejercicio de sus funciones",
+      "Exclusivamente los expedientes administrativos finalizados con resolución firme",
+      "Los datos estadísticos y económicos generados por la Administración General del Estado"
+    ],
+    c: 1,
+    exp: "<strong>Respuesta correcta: B.</strong> El art. 13 define la información pública como «los contenidos o documentos, cualquiera que sea su formato o soporte, que obren en poder de alguno de los sujetos incluidos en el ámbito de aplicación de este título y que hayan sido elaborados o adquiridos en el ejercicio de sus funciones». El concepto es amplio: incluye cualquier formato y exige solo dos requisitos: posesión y vínculo funcional."
+  },
+  {
+    p: "El artículo 14.1 de la Ley 19/2013 enumera los límites al derecho de acceso. ¿Cuál de los siguientes NO figura entre dichos límites?",
+    ops: [
+      "La seguridad nacional y la defensa",
+      "La protección del medio ambiente",
+      "Las creencias religiosas del solicitante de la información",
+      "El secreto profesional y la propiedad intelectual e industrial"
+    ],
+    c: 2,
+    exp: "<strong>Respuesta correcta: C.</strong> El art. 14.1 enumera doce límites: seguridad nacional, defensa, relaciones exteriores, seguridad pública, prevención/investigación/sanción de ilícitos, igualdad de las partes en procesos judiciales, funciones de vigilancia e inspección, intereses económicos y comerciales, política económica y monetaria, secreto profesional y propiedad intelectual, confidencialidad en procesos de decisión, y protección del medio ambiente. Las creencias religiosas del solicitante no son un límite al acceso; son un dato protegido del afectado (art. 15), no del solicitante."
+  },
+  {
+    p: "¿Qué exige el artículo 14.2 de la Ley 19/2013 para que la aplicación de los límites al derecho de acceso sea válida?",
+    ops: [
+      "Que la denegación sea aprobada por el Consejo de Transparencia y Buen Gobierno",
+      "Que la aplicación de los límites sea justificada y proporcionada a su objeto y finalidad de protección, atendiendo a las circunstancias del caso concreto",
+      "Que exista informe previo preceptivo de la Abogacía del Estado",
+      "Que el límite esté expresamente invocado por el solicitante en su petición inicial"
+    ],
+    c: 1,
+    exp: "<strong>Respuesta correcta: B.</strong> El art. 14.2 establece que «la aplicación de los límites será justificada y proporcionada a su objeto y finalidad de protección y atenderá a las circunstancias del caso concreto, especialmente a la concurrencia de un interés público o privado superior que justifique el acceso». No basta con invocar el límite abstractamente: requiere motivación y ponderación en cada caso."
+  },
+  {
+    p: "Según el artículo 15.1 de la Ley 19/2013, ¿cuándo se puede autorizar el acceso a información que contenga datos personales que revelen ideología, afiliación sindical, religión o creencias?",
+    ops: [
+      "Cuando lo solicite un investigador acreditado con fines científicos",
+      "Únicamente con el consentimiento expreso y por escrito del afectado, salvo que este los hubiese hecho manifiestamente públicos con anterioridad",
+      "Cuando el órgano competente lo autorice motivadamente por razones de interés general",
+      "En ningún caso, salvo resolución judicial firme que lo autorice expresamente"
+    ],
+    c: 1,
+    exp: "<strong>Respuesta correcta: B.</strong> El art. 15.1 establece que el acceso a datos sobre ideología, afiliación sindical, religión o creencias «únicamente se podrá autorizar en caso de que se contase con el consentimiento expreso y por escrito del afectado, a menos que dicho afectado hubiese hecho manifiestamente públicos los datos con anterioridad a que se solicitase el acceso». Es el régimen de protección más estricto de la Ley."
+  },
+  {
+    p: "El artículo 15.1 de la Ley 19/2013 regula también el acceso a datos relativos a origen racial, salud, vida sexual, datos genéticos o biométricos. ¿Bajo qué condiciones puede autorizarse el acceso?",
+    ops: [
+      "Solo mediante orden judicial expresa que lo autorice caso por caso",
+      "Con el consentimiento expreso del afectado o si este estuviera amparado por una norma con rango de ley",
+      "Tras disociación obligatoria de los datos en todo caso, sin posibilidad de acceso íntegro",
+      "Mediante autorización del Defensor del Pueblo, oído el órgano competente"
+    ],
+    c: 1,
+    exp: "<strong>Respuesta correcta: B.</strong> El art. 15.1 in fine establece que el acceso a datos de origen racial, salud, vida sexual, datos genéticos/biométricos o infracciones penales/administrativas sin amonestación pública «solo se podrá autorizar en caso de que se cuente con el consentimiento expreso del afectado o si aquel estuviera amparado por una norma con rango de ley». Nótese que aquí no se exige que el consentimiento sea «por escrito», a diferencia del supuesto del primer párrafo."
+  },
+  {
+    p: "El artículo 15.2 de la Ley 19/2013 establece una regla general para los datos meramente identificativos relacionados con la organización, funcionamiento o actividad pública del órgano. ¿Cuál es?",
+    ops: [
+      "Se deniega el acceso salvo autorización expresa del afectado",
+      "Se concederá el acceso, salvo que en el caso concreto prevalezca la protección de datos personales u otros derechos constitucionales sobre el interés público en la divulgación",
+      "Se concede el acceso únicamente tras un periodo de disociación de cinco años desde su generación",
+      "Se requiere siempre informe previo de la Agencia Española de Protección de Datos"
+    ],
+    c: 1,
+    exp: "<strong>Respuesta correcta: B.</strong> El art. 15.2 establece que «con carácter general, y salvo que en el caso concreto prevalezca la protección de datos personales u otros derechos constitucionalmente protegidos sobre el interés público en la divulgación que lo impida, se concederá el acceso a información que contenga datos meramente identificativos relacionados con la organización, funcionamiento o actividad pública del órgano». La regla general es la concesión del acceso para este tipo de datos."
+  },
+  {
+    p: "Cuando la información solicitada no contiene datos especialmente protegidos (art. 15.3 de la Ley 19/2013), ¿qué debe hacer el órgano competente antes de conceder el acceso?",
+    ops: [
+      "Conceder el acceso automáticamente sin ningún tipo de ponderación previa",
+      "Realizar una ponderación suficientemente razonada entre el interés público en la divulgación y los derechos de los afectados, en particular su derecho a la protección de datos",
+      "Solicitar autorización al superior jerárquico antes de resolver",
+      "Consultar preceptivamente al Consejo de Transparencia y Buen Gobierno"
+    ],
+    c: 1,
+    exp: "<strong>Respuesta correcta: B.</strong> El art. 15.3 establece que el órgano «concederá el acceso previa ponderación suficientemente razonada del interés público en la divulgación de la información y los derechos de los afectados cuyos datos aparezcan en la información solicitada, en particular su derecho fundamental a la protección de datos de carácter personal»."
+  },
+  {
+    p: "¿Cuál de los siguientes NO es uno de los criterios de ponderación que enumera el artículo 15.3 de la Ley 19/2013?",
+    ops: [
+      "El menor perjuicio a los afectados derivado del transcurso de los plazos del art. 57 de la Ley del Patrimonio Histórico Español",
+      "La justificación del solicitante en el ejercicio de un derecho, o su condición de investigador con fines históricos, científicos o estadísticos",
+      "El número de solicitudes de acceso presentadas anteriormente por el mismo solicitante",
+      "La mayor garantía de los derechos de los afectados cuando los datos puedan afectar a su intimidad, seguridad o se refieran a menores"
+    ],
+    c: 2,
+    exp: "<strong>Respuesta correcta: C.</strong> El art. 15.3 enumera cuatro criterios: a) menor perjuicio por transcurso de plazos del Patrimonio Histórico; b) justificación del solicitante o condición de investigador; c) menor perjuicio si los datos son meramente identificativos; d) mayor garantía si afecta a intimidad, seguridad o menores. El número de solicitudes previas del solicitante no es un criterio de ponderación de este artículo (aunque sí es relevante para la causa de inadmisión por carácter repetitivo del art. 18.1.e)."
+  },
+  {
+    p: "¿Qué establece el artículo 15.4 de la Ley 19/2013 sobre la disociación de datos personales?",
+    ops: [
+      "La disociación es siempre obligatoria antes de conceder cualquier acceso a información pública",
+      "Las reglas de protección de datos personales no serán aplicables si el acceso se efectúa previa disociación de los datos de modo que se impida la identificación de las personas afectadas",
+      "La disociación solo puede realizarla la Agencia Española de Protección de Datos",
+      "La disociación únicamente se aplica a datos especialmente protegidos, no a los meramente identificativos"
+    ],
+    c: 1,
+    exp: "<strong>Respuesta correcta: B.</strong> El art. 15.4 establece que «no será aplicable lo establecido en los apartados anteriores si el acceso se efectúa previa disociación de los datos de carácter personal de modo que se impida la identificación de las personas afectadas». La disociación (anonimización) permite sortear las restricciones de protección de datos, ya que sin identificación no hay dato personal afectado."
+  },
+  {
+    p: "El artículo 16 de la Ley 19/2013 regula el acceso parcial. ¿En qué supuesto NO procede conceder dicho acceso parcial?",
+    ops: [
+      "Cuando alguno de los límites del art. 14 no afecte a la totalidad de la información",
+      "Cuando, tras omitir la información afectada por el límite, resulte una información distorsionada o que carezca de sentido",
+      "Cuando el solicitante no haya motivado expresamente su petición de acceso",
+      "Cuando hayan transcurrido más de quince días desde la presentación de la solicitud"
+    ],
+    c: 1,
+    exp: "<strong>Respuesta correcta: B.</strong> El art. 16 establece que se concederá el acceso parcial omitiendo la información afectada por el límite, «salvo que de ello resulte una información distorsionada o que carezca de sentido». En tal caso no procede el acceso parcial, y debe indicarse al solicitante que parte de la información ha sido omitida."
+  },
+
+  /* ══ LEY 19/2013 — SECCIÓN 2ª: EJERCICIO DEL DERECHO ══ */
+  {
+    p: "Según el artículo 17.3 de la Ley 19/2013, ¿está el solicitante obligado a motivar su solicitud de acceso a la información?",
+    ops: [
+      "Sí, siempre, motivando el interés legítimo que ostenta",
+      "No está obligado a motivarla, aunque puede exponer los motivos, que podrán tenerse en cuenta; la ausencia de motivación no será por sí sola causa de rechazo",
+      "Solo está obligado a motivarla cuando la información afecte a datos personales de terceros",
+      "Solo está obligado cuando la solicitud se presente por medios no electrónicos"
+    ],
+    c: 1,
+    exp: "<strong>Respuesta correcta: B.</strong> El art. 17.3 establece que «el solicitante no está obligado a motivar su solicitud de acceso a la información. Sin embargo, podrá exponer los motivos por los que solicita la información y que podrán ser tenidos en cuenta cuando se dicte la resolución. No obstante, la ausencia de motivación no será por si sola causa de rechazo de la solicitud»."
+  },
+  {
+    p: "¿Qué establece el artículo 17.4 de la Ley 19/2013 respecto al idioma de las solicitudes de acceso?",
+    ops: [
+      "Las solicitudes deben presentarse obligatoriamente en castellano salvo acuerdo bilateral",
+      "Los solicitantes podrán dirigirse a las Administraciones Públicas en cualquiera de las lenguas cooficiales del Estado en el territorio en que radique la Administración en cuestión",
+      "Solo se admite el castellano como lengua oficial de tramitación de solicitudes de acceso",
+      "Se requiere traducción jurada cuando la solicitud se presente en una lengua cooficial distinta del castellano"
+    ],
+    c: 1,
+    exp: "<strong>Respuesta correcta: B.</strong> El art. 17.4 dispone que «los solicitantes de información podrán dirigirse a las Administraciones Públicas en cualquiera de las lenguas cooficiales del Estado en el territorio en el que radique la Administración en cuestión». Respeta así el régimen de cooficialidad lingüística reconocido constitucionalmente."
+  },
+  {
+    p: "¿Cuál de las siguientes causas de inadmisión NO figura en el artículo 18.1 de la Ley 19/2013?",
+    ops: [
+      "Información que esté en curso de elaboración o de publicación general",
+      "Información que tenga carácter auxiliar o de apoyo, como notas, borradores u opiniones internas",
+      "Información cuya divulgación pueda perjudicar la imagen institucional del órgano solicitado",
+      "Solicitudes manifiestamente repetitivas o de carácter abusivo no justificado con la finalidad de transparencia"
+    ],
+    c: 2,
+    exp: "<strong>Respuesta correcta: C.</strong> El art. 18.1 enumera cinco causas de inadmisión: a) información en curso de elaboración o publicación general; b) información de carácter auxiliar (notas, borradores, opiniones, informes internos); c) información que requiera reelaboración previa; d) solicitudes dirigidas a órgano sin la información cuando se desconozca el competente; e) solicitudes manifiestamente repetitivas o abusivas. El perjuicio a la «imagen institucional» no es una causa de inadmisión prevista legalmente."
+  },
+  {
+    p: "Cuando se inadmite una solicitud por estar dirigida a un órgano que no posee la información y se desconoce el competente (art. 18.2 de la Ley 19/2013), ¿qué debe hacer el órgano que inadmite?",
+    ops: [
+      "Archivar el expediente sin más trámite, comunicando solo la inadmisión",
+      "Remitir directamente la solicitud al órgano que presuma competente",
+      "Indicar en la resolución el órgano que, a su juicio, es competente para conocer de la solicitud",
+      "Suspender la resolución hasta que el solicitante identifique el órgano competente"
+    ],
+    c: 2,
+    exp: "<strong>Respuesta correcta: C.</strong> El art. 18.2 establece que «en el caso en que se inadmita la solicitud por concurrir la causa prevista en la letra d) del apartado anterior, el órgano que acuerde la inadmisión deberá indicar en la resolución el órgano que, a su juicio, es competente para conocer de la solicitud». Nótese que esto es distinto del art. 19.1, que regula el supuesto en que sí se conoce el órgano competente (remisión directa)."
+  },
+  {
+    p: "Según el artículo 19.2 de la Ley 19/2013, ¿qué ocurre si la solicitud no identifica de forma suficiente la información solicitada?",
+    ops: [
+      "Se deniega automáticamente por falta de concreción del objeto",
+      "Se pide al solicitante que la concrete en un plazo de diez días, con la advertencia de que se le tendrá por desistido si no lo hace, y se suspende el plazo para resolver",
+      "Se concede un acceso parcial limitado a la información que pueda identificarse razonablemente",
+      "El órgano competente debe interpretar la solicitud de la forma más favorable al solicitante sin requerirle nada"
+    ],
+    c: 1,
+    exp: "<strong>Respuesta correcta: B.</strong> El art. 19.2 establece que «se pedirá al solicitante que la concrete en un plazo de diez días, con indicación de que, en caso de no hacerlo, se le tendrá por desistido, así como de la suspensión del plazo para dictar resolución». Es un trámite de subsanación similar al del procedimiento administrativo común."
+  },
+  {
+    p: "Si la información solicitada puede afectar a derechos o intereses de terceros identificados (art. 19.3 de la Ley 19/2013), ¿qué plazo se les concede para alegar?",
+    ops: [
+      "Diez días",
+      "Quince días",
+      "Veinte días",
+      "Treinta días"
+    ],
+    c: 1,
+    exp: "<strong>Respuesta correcta: B.</strong> El art. 19.3 establece que a los terceros afectados «se les concederá un plazo de quince días para que puedan realizar las alegaciones que estimen oportunas». El plazo para resolver queda suspendido hasta que se reciban las alegaciones o transcurra dicho plazo."
+  },
+  {
+    p: "¿Cuál es el plazo máximo ordinario para notificar la resolución de acceso a la información, según el artículo 20.1 de la Ley 19/2013?",
+    ops: [
+      "Quince días desde la recepción de la solicitud",
+      "Un mes desde la recepción de la solicitud por el órgano competente para resolver, ampliable por otro mes en casos de volumen o complejidad",
+      "Dos meses desde la recepción de la solicitud, sin posibilidad de ampliación",
+      "Veinte días hábiles desde la recepción de la solicitud"
+    ],
+    c: 1,
+    exp: "<strong>Respuesta correcta: B.</strong> El art. 20.1 establece que la resolución «deberá notificarse al solicitante y a los terceros afectados que así lo hayan solicitado en el plazo máximo de un mes desde la recepción de la solicitud», plazo que «podrá ampliarse por otro mes en el caso de que el volumen o la complejidad de la información que se solicita así lo hagan necesario y previa notificación al solicitante»."
+  },
+  {
+    p: "¿Qué tipo de resoluciones deben ser motivadas según el artículo 20.2 de la Ley 19/2013?",
+    ops: [
+      "Únicamente las que deniegan totalmente el acceso a la información",
+      "Las que deniegan el acceso, las que conceden el acceso parcial o por modalidad distinta a la solicitada, y las que permiten el acceso habiendo habido oposición de un tercero",
+      "Todas las resoluciones, sin excepción, en materia de acceso a la información",
+      "Solo las resoluciones que afecten a información clasificada como reservada"
+    ],
+    c: 1,
+    exp: "<strong>Respuesta correcta: B.</strong> El art. 20.2 establece que «serán motivadas las resoluciones que denieguen el acceso, las que concedan el acceso parcial o a través de una modalidad distinta a la solicitada y las que permitan el acceso cuando haya habido oposición de un tercero». Las resoluciones que conceden el acceso íntegro sin oposición de terceros no requieren motivación expresa."
+  },
+  {
+    p: "¿Qué efecto produce el silencio administrativo cuando transcurre el plazo máximo para resolver sin notificación expresa, según el artículo 20.4 de la Ley 19/2013?",
+    ops: [
+      "Se entenderá estimada la solicitud (silencio positivo)",
+      "Se entenderá que la solicitud ha sido desestimada (silencio negativo)",
+      "El procedimiento se considera caducado y debe iniciarse de nuevo",
+      "Se presume tácitamente concedido el acceso parcial a la información disponible"
+    ],
+    c: 1,
+    exp: "<strong>Respuesta correcta: B.</strong> El art. 20.4 establece que «transcurrido el plazo máximo para resolver sin que se haya dictado y notificado resolución expresa se entenderá que la solicitud ha sido desestimada». A diferencia del visado de igualdad de la Ley 9/2003 GVA (silencio positivo), aquí el silencio en materia de acceso a la información es negativo."
+  },
+  {
+    p: "Según el artículo 20.6 de la Ley 19/2013, ¿qué consideración tiene el incumplimiento reiterado de la obligación de resolver en plazo?",
+    ops: [
+      "Infracción leve a efectos del régimen disciplinario aplicable",
+      "Infracción grave a los efectos de la aplicación a sus responsables del régimen disciplinario previsto en la normativa reguladora",
+      "Causa de nulidad de pleno derecho de todas las resoluciones del órgano afectado",
+      "Motivo de cese automático del responsable del órgano competente"
+    ],
+    c: 1,
+    exp: "<strong>Respuesta correcta: B.</strong> El art. 20.6 establece que «el incumplimiento reiterado de la obligación de resolver en plazo tendrá la consideración de infracción grave a los efectos de la aplicación a sus responsables del régimen disciplinario previsto en la correspondiente normativa reguladora». Es una garantía adicional para forzar el cumplimiento de los plazos."
+  },
+  {
+    p: "El artículo 21.2 de la Ley 19/2013 enumera las funciones de las unidades de información en la AGE. ¿Cuál de las siguientes NO es una de esas funciones?",
+    ops: [
+      "Llevar un registro de las solicitudes de acceso a la información",
+      "Mantener actualizado un mapa de contenidos de los distintos tipos de información que obre en poder del órgano",
+      "Resolver en última instancia los recursos contencioso-administrativos contra denegaciones de acceso",
+      "Asegurar la disponibilidad en la web o sede electrónica de la información cuyo acceso se solicita con más frecuencia"
+    ],
+    c: 2,
+    exp: "<strong>Respuesta correcta: C.</strong> El art. 21.2 enumera ocho funciones de las unidades de información: recabar y difundir información, recibir y tramitar solicitudes, realizar trámites internos, hacer seguimiento y control, llevar registro de solicitudes, asegurar disponibilidad web de información frecuente, mantener mapa de contenidos, y cualquier otra necesaria. Resolver recursos contencioso-administrativos corresponde a los órganos jurisdiccionales, no a estas unidades administrativas."
+  },
+  {
+    p: "Según el artículo 22.1 de la Ley 19/2013, ¿en qué plazo máximo debe otorgarse el acceso cuando no pueda darse en el momento de la notificación de la resolución?",
+    ops: [
+      "Cinco días",
+      "Diez días",
+      "Quince días",
+      "Veinte días"
+    ],
+    c: 1,
+    exp: "<strong>Respuesta correcta: B.</strong> El art. 22.1 establece que «cuando no pueda darse el acceso en el momento de la notificación de la resolución deberá otorgarse, en cualquier caso, en un plazo no superior a diez días». Además, el acceso se realiza preferentemente por vía electrónica, salvo que no sea posible o el solicitante haya indicado otro medio."
+  },
+  {
+    p: "¿Es gratuito el acceso a la información pública según el artículo 22.4 de la Ley 19/2013?",
+    ops: [
+      "No, siempre conlleva el pago de una tasa fija establecida reglamentariamente",
+      "Sí, el acceso es gratuito, aunque la expedición de copias o la conversión a un formato distinto puede dar lugar a exacciones según la normativa de tasas",
+      "Es gratuito solo para las personas físicas; las personas jurídicas deben abonar tasa",
+      "Es gratuito solo cuando el acceso se realice por medios electrónicos"
+    ],
+    c: 1,
+    exp: "<strong>Respuesta correcta: B.</strong> El art. 22.4 establece que «el acceso a la información será gratuito. No obstante, la expedición de copias o la trasposición de la información a un formato diferente al original podrá dar lugar a la exigencia de exacciones en los términos previstos en la Ley 8/1989, de Tasas y Precios Públicos, o, en su caso, conforme a la normativa autonómica o local aplicable»."
+  },
+
+  /* ══ LEY 19/2013 — SECCIÓN 3ª: IMPUGNACIONES ══ */
+  {
+    p: "El artículo 24.1 de la Ley 19/2013 regula la reclamación ante el Consejo de Transparencia y Buen Gobierno. ¿Qué carácter tiene dicha reclamación?",
+    ops: [
+      "Obligatoria y excluyente de cualquier otro recurso administrativo o judicial",
+      "Potestativa y previa a su impugnación en vía contencioso-administrativa",
+      "Subsidiaria, solo admisible cuando se haya agotado previamente la vía judicial",
+      "Vinculante para el órgano administrativo, pero sin posibilidad de recurso posterior"
+    ],
+    c: 1,
+    exp: "<strong>Respuesta correcta: B.</strong> El art. 24.1 establece que frente a toda resolución en materia de acceso «podrá interponerse una reclamación ante el Consejo de Transparencia y Buen Gobierno, con carácter potestativo y previo a su impugnación en vía contencioso-administrativa». No es obligatorio acudir a esta reclamación: el interesado puede ir directamente a la vía contencioso-administrativa."
+  },
+  {
+    p: "¿En qué plazo debe interponerse la reclamación ante el Consejo de Transparencia y Buen Gobierno, según el artículo 24.2 de la Ley 19/2013?",
+    ops: [
+      "Quince días desde la notificación del acto impugnado",
+      "Un mes a contar desde el día siguiente al de la notificación del acto impugnado o desde el día siguiente a los efectos del silencio administrativo",
+      "Dos meses desde la notificación del acto impugnado",
+      "Tres meses desde que se produjeron los efectos del silencio administrativo"
+    ],
+    c: 1,
+    exp: "<strong>Respuesta correcta: B.</strong> El art. 24.2 establece que «la reclamación se interpondrá en el plazo de un mes a contar desde el día siguiente al de la notificación del acto impugnado o desde el día siguiente a aquel en que se produzcan los efectos del silencio administrativo». Este plazo es mucho más breve que el general de dos meses para el recurso contencioso-administrativo."
+  },
+  {
+    p: "¿Cuál es el plazo máximo para resolver y notificar la reclamación ante el Consejo de Transparencia y Buen Gobierno, según el artículo 24.4 de la Ley 19/2013?",
+    ops: [
+      "Un mes, transcurrido el cual se entenderá estimada",
+      "Dos meses, transcurrido el cual se entenderá desestimada",
+      "Tres meses, transcurrido el cual la reclamación se entenderá desestimada",
+      "Seis meses, transcurrido el cual se entenderá estimada por silencio positivo"
+    ],
+    c: 2,
+    exp: "<strong>Respuesta correcta: C.</strong> El art. 24.4 establece que «el plazo máximo para resolver y notificar la resolución será de tres meses, transcurrido el cual, la reclamación se entenderá desestimada». Es un silencio negativo, coherente con el régimen general de la propia ley en materia de acceso a la información."
+  },
+  {
+    p: "Cuando la denegación del acceso a la información se fundamenta en la protección de derechos de terceros (art. 24.3 de la Ley 19/2013), ¿qué trámite debe darse antes de resolver la reclamación?",
+    ops: [
+      "Informe preceptivo de la Agencia Española de Protección de Datos",
+      "Trámite de audiencia a las personas que pudieran resultar afectadas para que aleguen lo que a su derecho convenga",
+      "Dictamen del Consejo de Estado sobre la procedencia de la denegación",
+      "Consulta previa al Defensor del Pueblo sobre la proporcionalidad de la medida"
+    ],
+    c: 1,
+    exp: "<strong>Respuesta correcta: B.</strong> El art. 24.3 establece que «cuando la denegación del acceso a la información se fundamente en la protección de derechos o intereses de terceros se otorgará, previamente a la resolución de la reclamación, trámite de audiencia a las personas que pudieran resultar afectadas para que aleguen lo que a su derecho convenga». Es una garantía procedimental para los terceros."
+  },
+  {
+    p: "Según el artículo 24.5 de la Ley 19/2013, ¿a quién comunica el Presidente del Consejo de Transparencia y Buen Gobierno las resoluciones que dicte en aplicación de este artículo?",
+    ops: [
+      "Al Ministerio Fiscal",
+      "Al Defensor del Pueblo",
+      "Al Tribunal Constitucional",
+      "A la Agencia Española de Protección de Datos"
+    ],
+    c: 1,
+    exp: "<strong>Respuesta correcta: B.</strong> El art. 24.5 establece que «el Presidente del Consejo de Transparencia y Buen Gobierno comunicará al Defensor del Pueblo las resoluciones que dicte en aplicación de este artículo». Esta comunicación permite al Defensor del Pueblo conocer la actividad del Consejo en materia de reclamaciones de acceso."
+  },
+
+  /* ══ LO 3/2018 — TÍTULO I ══ */
+  {
+    p: "El artículo 1 de la LO 3/2018 establece un doble objeto para la ley. ¿Cuál es?",
+    ops: [
+      "Adaptar el ordenamiento español al RGPD y completar sus disposiciones, y garantizar los derechos digitales de la ciudadanía",
+      "Crear la Agencia Española de Protección de Datos y regular su régimen sancionador",
+      "Trasponer la Directiva europea de protección de datos en materia penal y regular el habeas data",
+      "Regular exclusivamente el tratamiento de datos por las Administraciones Públicas españolas"
+    ],
+    c: 0,
+    exp: "<strong>Respuesta correcta: A.</strong> El art. 1 LO 3/2018 establece dos objetos: a) «adaptar el ordenamiento jurídico español al Reglamento (UE) 2016/679... y completar sus disposiciones»; b) «garantizar los derechos digitales de la ciudadanía conforme al mandato establecido en el artículo 18.4 de la Constitución»."
+  },
+  {
+    p: "¿En qué artículo de la Constitución Española se ampara el derecho fundamental a la protección de datos personales, según el artículo 1 de la LO 3/2018?",
+    ops: [
+      "Artículo 18.1 de la Constitución",
+      "Artículo 18.4 de la Constitución",
+      "Artículo 20.1.d) de la Constitución",
+      "Artículo 105.b) de la Constitución"
+    ],
+    c: 1,
+    exp: "<strong>Respuesta correcta: B.</strong> El art. 1 LO 3/2018 establece que «el derecho fundamental de las personas físicas a la protección de datos personales, amparado por el artículo 18.4 de la Constitución, se ejercerá con arreglo a lo establecido en el Reglamento (UE) 2016/679 y en esta ley orgánica». El art. 18.4 CE encomienda a la ley limitar el uso de la informática para garantizar el honor, la intimidad y el pleno ejercicio de derechos."
+  },
+  {
+    p: "Según el artículo 2.2.b) de la LO 3/2018, ¿se aplica esta ley orgánica a los tratamientos de datos de personas fallecidas?",
+    ops: [
+      "Sí, se aplica plenamente, equiparando a las personas fallecidas con las vivas",
+      "No, la ley orgánica no será de aplicación a los tratamientos de datos de personas fallecidas, sin perjuicio de lo establecido en el artículo 3",
+      "Se aplica únicamente durante el primer año tras el fallecimiento",
+      "Se aplica solo si el fallecido había prestado consentimiento expreso en vida para el tratamiento posterior"
+    ],
+    c: 1,
+    exp: "<strong>Respuesta correcta: B.</strong> El art. 2.2.b) LO 3/2018 excluye del ámbito de aplicación de la ley «a los tratamientos de datos de personas fallecidas, sin perjuicio de lo establecido en el artículo 3». El art. 3 regula de forma específica el acceso a los datos del fallecido por personas vinculadas, herederos o personas designadas por el causante."
+  },
+  {
+    p: "¿A quiénes permite el artículo 3.1 de la LO 3/2018 dirigirse al responsable del tratamiento para solicitar el acceso, rectificación o supresión de los datos de una persona fallecida?",
+    ops: [
+      "Únicamente a sus herederos legales con título sucesorio inscrito",
+      "A las personas vinculadas al fallecido por razones familiares o de hecho, así como a sus herederos",
+      "Solo al cónyuge supérstite o pareja de hecho registrada",
+      "A cualquier persona física o jurídica que acredite interés legítimo, sin restricción adicional"
+    ],
+    c: 1,
+    exp: "<strong>Respuesta correcta: B.</strong> El art. 3.1 LO 3/2018 establece que «las personas vinculadas al fallecido por razones familiares o de hecho así como sus herederos podrán dirigirse al responsable o encargado del tratamiento al objeto de solicitar el acceso a los datos personales de aquella y, en su caso, su rectificación o supresión»."
+  },
+  {
+    p: "El artículo 3.1 de la LO 3/2018 establece una excepción a esta facultad de acceso a los datos del fallecido. ¿Cuál es?",
+    ops: [
+      "No puede ejercerse cuando hayan transcurrido más de diez años desde el fallecimiento",
+      "No procede cuando la persona fallecida lo hubiese prohibido expresamente o así lo establezca una ley, sin que ello afecte al derecho de los herederos a acceder a los datos de carácter patrimonial",
+      "No procede si el fallecido era menor de edad en el momento de su muerte",
+      "No procede cuando el responsable del tratamiento sea una Administración Pública"
+    ],
+    c: 1,
+    exp: "<strong>Respuesta correcta: B.</strong> El art. 3.1 establece que las personas vinculadas «no podrán acceder a los datos del causante, ni solicitar su rectificación o supresión, cuando la persona fallecida lo hubiese prohibido expresamente o así lo establezca una ley», pero aclara que «dicha prohibición no afectará al derecho de los herederos a acceder a los datos de carácter patrimonial del causante»."
+  },
+  {
+    p: "Según el artículo 3.3 de la LO 3/2018, en caso de fallecimiento de un menor de edad, ¿quién más puede ejercer las facultades de acceso a sus datos, además de sus representantes legales?",
+    ops: [
+      "Cualquier familiar hasta el cuarto grado de consanguinidad",
+      "El Ministerio Fiscal, en el marco de sus competencias, actuando de oficio o a instancia de cualquier persona física o jurídica interesada",
+      "El Defensor del Pueblo o, en su caso, el Defensor del Menor autonómico",
+      "El centro educativo al que estuviera adscrito el menor en el momento de su fallecimiento"
+    ],
+    c: 1,
+    exp: "<strong>Respuesta correcta: B.</strong> El art. 3.3 LO 3/2018 establece que «en caso de fallecimiento de menores, estas facultades podrán ejercerse también por sus representantes legales o, en el marco de sus competencias, por el Ministerio Fiscal, que podrá actuar de oficio o a instancia de cualquier persona física o jurídica interesada»."
+  },
+
+  /* ══ LO 3/2018 — TÍTULO II ══ */
+  {
+    p: "El artículo 4.2 de la LO 3/2018 regula cuándo no es imputable al responsable la inexactitud de los datos personales. ¿En qué supuesto se exime de responsabilidad?",
+    ops: [
+      "Cuando el responsable haya adoptado todas las medidas razonables para suprimirlos o rectificarlos sin dilación, y los datos inexactos hubiesen sido obtenidos directamente del afectado, de un intermediario, por portabilidad o de un registro público",
+      "Cuando la inexactitud se deba a un error informático del sistema de tratamiento automatizado",
+      "En todo caso, siempre que el responsable acredite buena fe en el tratamiento",
+      "Cuando los datos inexactos no hayan sido cedidos a terceros en ningún momento"
+    ],
+    c: 0,
+    exp: "<strong>Respuesta correcta: A.</strong> El art. 4.2 LO 3/2018 exime de responsabilidad al responsable, siempre que haya adoptado medidas razonables para corregir la inexactitud sin dilación, cuando los datos inexactos: a) procedan directamente del afectado; b) procedan de un mediador o intermediario; c) procedan del ejercicio del derecho de portabilidad; d) procedan de un registro público."
+  },
+  {
+    p: "¿Se mantiene el deber de confidencialidad regulado en el artículo 5 de la LO 3/2018 una vez finalizada la relación del obligado con el responsable o encargado del tratamiento?",
+    ops: [
+      "No, el deber se extingue automáticamente al finalizar la relación contractual o laboral",
+      "Sí, las obligaciones de confidencialidad se mantendrán aun cuando hubiese finalizado la relación del obligado con el responsable o encargado del tratamiento",
+      "Se mantiene únicamente durante los dos años siguientes a la finalización de la relación",
+      "Solo se mantiene si así se pacta expresamente en el contrato de prestación de servicios"
+    ],
+    c: 1,
+    exp: "<strong>Respuesta correcta: B.</strong> El art. 5.3 LO 3/2018 establece que «las obligaciones establecidas en los apartados anteriores se mantendrán aun cuando hubiese finalizado la relación del obligado con el responsable o encargado del tratamiento». El deber de confidencialidad es indefinido en el tiempo, sin límite temporal."
+  },
+  {
+    p: "El artículo 6.1 de la LO 3/2018 define el consentimiento del afectado conforme al RGPD. ¿Qué características debe reunir?",
+    ops: [
+      "Debe ser tácito, genérico y revocable en cualquier momento",
+      "Debe ser una manifestación de voluntad libre, específica, informada e inequívoca",
+      "Debe constar siempre por escrito y con firma manuscrita del afectado",
+      "Debe ser otorgado ante notario cuando se trate de categorías especiales de datos"
+    ],
+    c: 1,
+    exp: "<strong>Respuesta correcta: B.</strong> El art. 6.1 LO 3/2018 define el consentimiento como «toda manifestación de voluntad libre, específica, informada e inequívoca por la que este acepta, ya sea mediante una declaración o una clara acción afirmativa, el tratamiento de datos personales que le conciernen». Son cuatro características acumulativas: libre, específica, informada e inequívoca."
+  },
+  {
+    p: "Según el artículo 6.3 de la LO 3/2018, ¿puede condicionarse la ejecución de un contrato a que el afectado consienta el tratamiento de sus datos para otras finalidades?",
+    ops: [
+      "Sí, siempre que se informe adecuadamente al afectado de dicha condición",
+      "No podrá supeditarse la ejecución del contrato a que el afectado consienta el tratamiento de los datos personales para finalidades que no guarden relación con el mantenimiento, desarrollo o control de la relación contractual",
+      "Sí, pero solo si las finalidades adicionales son de naturaleza comercial o publicitaria",
+      "No, salvo que el contrato sea de adhesión y el afectado sea una persona jurídica"
+    ],
+    c: 1,
+    exp: "<strong>Respuesta correcta: B.</strong> El art. 6.3 LO 3/2018 prohíbe expresamente que «se supedite la ejecución del contrato a que el afectado consienta el tratamiento de los datos personales para finalidades que no guarden relación con el mantenimiento, desarrollo o control de la relación contractual». Es una garantía frente a la vinculación abusiva del consentimiento (tying)."
+  },
+  {
+    p: "¿A partir de qué edad puede un menor prestar válidamente su consentimiento para el tratamiento de sus datos personales, según el artículo 7.1 de la LO 3/2018?",
+    ops: [
+      "A partir de los doce años de edad",
+      "A partir de los catorce años de edad",
+      "A partir de los dieciséis años de edad",
+      "A partir de los dieciocho años de edad, sin excepciones"
+    ],
+    c: 1,
+    exp: "<strong>Respuesta correcta: B.</strong> El art. 7.1 LO 3/2018 establece que «el tratamiento de los datos personales de un menor de edad únicamente podrá fundarse en su consentimiento cuando sea mayor de catorce años», salvo que la ley exija la asistencia de los titulares de la patria potestad o tutela para el acto o negocio jurídico de que se trate. España fijó esta edad por debajo del límite general de 16 años que permite el RGPD, dentro del margen de flexibilidad nacional."
+  },
+  {
+    p: "¿Quién debe consentir el tratamiento de datos de un menor de catorce años, según el artículo 7.2 de la LO 3/2018?",
+    ops: [
+      "El propio menor, con la mera asistencia informativa de sus progenitores",
+      "Solo será lícito si consta el consentimiento del titular de la patria potestad o tutela, con el alcance que estos determinen",
+      "El centro educativo en el que esté matriculado el menor",
+      "El Ministerio Fiscal, en representación del interés superior del menor"
+    ],
+    c: 1,
+    exp: "<strong>Respuesta correcta: B.</strong> El art. 7.2 LO 3/2018 establece que «el tratamiento de los datos de los menores de catorce años, fundado en el consentimiento, solo será lícito si consta el del titular de la patria potestad o tutela, con el alcance que determinen los titulares de la patria potestad o tutela»."
+  },
+  {
+    p: "El artículo 8.1 de la LO 3/2018 regula el tratamiento de datos fundado en el cumplimiento de una obligación legal. ¿Qué tipo de norma debe prever dicha obligación?",
+    ops: [
+      "Cualquier disposición administrativa, incluidas las de rango reglamentario",
+      "Una norma de Derecho de la Unión Europea o una norma con rango de ley",
+      "Una instrucción interna del responsable del tratamiento debidamente publicada",
+      "Un convenio o acuerdo de colaboración entre Administraciones Públicas"
+    ],
+    c: 1,
+    exp: "<strong>Respuesta correcta: B.</strong> El art. 8.1 LO 3/2018 establece que el tratamiento fundado en obligación legal solo puede considerarse así «cuando así lo prevea una norma de Derecho de la Unión Europea o una norma con rango de ley». No basta una norma reglamentaria; se exige rango de ley (reserva de ley), lo que ofrece mayor garantía al afectado."
+  },
+  {
+    p: "Según el artículo 8.2 de la LO 3/2018, ¿qué se requiere para que el tratamiento de datos se considere fundado en el ejercicio de poderes públicos o el cumplimiento de una misión de interés público?",
+    ops: [
+      "Que derive de una competencia atribuida por una norma con rango de ley",
+      "Que el responsable acredite un interés legítimo proporcional al tratamiento",
+      "Que exista autorización previa de la Agencia Española de Protección de Datos",
+      "Que el tratamiento esté incluido en el Registro General de Protección de Datos"
+    ],
+    c: 0,
+    exp: "<strong>Respuesta correcta: A.</strong> El art. 8.2 LO 3/2018 establece que este fundamento del tratamiento solo procede «cuando derive de una competencia atribuida por una norma con rango de ley». Al igual que en el caso de la obligación legal, rige la reserva de ley como garantía frente a tratamientos arbitrarios por parte de los poderes públicos."
+  },
+  {
+    p: "El artículo 9.1 de la LO 3/2018 establece una limitación específica respecto al consentimiento para tratar categorías especiales de datos. ¿Cuál es?",
+    ops: [
+      "El solo consentimiento del afectado no bastará para levantar la prohibición del tratamiento de datos cuya finalidad principal sea identificar ideología, afiliación sindical, religión, orientación sexual, creencias u origen racial o étnico",
+      "El consentimiento debe ser siempre ratificado por escrito ante notario para estas categorías de datos",
+      "Solo puede prestarse el consentimiento para estas categorías cuando el afectado sea mayor de edad",
+      "El consentimiento debe renovarse anualmente para mantener la licitud del tratamiento"
+    ],
+    c: 0,
+    exp: "<strong>Respuesta correcta: A.</strong> El art. 9.1 LO 3/2018 establece, «a fin de evitar situaciones discriminatorias», que «el solo consentimiento del afectado no bastará para levantar la prohibición del tratamiento de datos cuya finalidad principal sea identificar su ideología, afiliación sindical, religión, orientación sexual, creencias u origen racial o étnico». Es una garantía reforzada española, más estricta que el RGPD en este punto concreto."
+  },
+  {
+    p: "¿En qué casos puede llevarse a cabo el tratamiento de datos personales relativos a condenas e infracciones penales para fines distintos de la investigación o ejecución de sanciones, según el artículo 10.1 de la LO 3/2018?",
+    ops: [
+      "Nunca, salvo que medie sentencia judicial firme que lo autorice expresamente",
+      "Cuando se encuentre amparado en una norma de Derecho de la Unión, en la propia LO 3/2018 o en otras normas de rango legal",
+      "Cuando el afectado preste su consentimiento expreso, sin necesidad de cobertura legal adicional",
+      "Cuando lo solicite el Ministerio Fiscal en el marco de una investigación en curso"
+    ],
+    c: 1,
+    exp: "<strong>Respuesta correcta: B.</strong> El art. 10.1 LO 3/2018 establece que el tratamiento de datos sobre condenas e infracciones penales para fines distintos de prevención, investigación o ejecución de sanciones penales «solo podrá llevarse a cabo cuando se encuentre amparado en una norma de Derecho de la Unión, en esta ley orgánica o en otras normas de rango legal». Nuevamente rige la reserva de ley para estos datos especialmente sensibles."
+  },
+  {
+    p: "El artículo 10.3 de la LO 3/2018 permite el tratamiento de datos sobre condenas e infracciones penales en un supuesto profesional concreto. ¿Cuál es?",
+    ops: [
+      "Cuando lo realicen periodistas con fines de interés informativo legítimo",
+      "Cuando sean llevados a cabo por abogados y procuradores y tengan por objeto recoger la información facilitada por sus clientes para el ejercicio de sus funciones",
+      "Cuando lo realicen entidades aseguradoras para el cálculo de primas de seguro",
+      "Cuando lo realicen entidades bancarias para la evaluación de solvencia crediticia"
+    ],
+    c: 1,
+    exp: "<strong>Respuesta correcta: B.</strong> El art. 10.3 LO 3/2018 establece que, fuera de los supuestos generales, estos tratamientos «solo serán posibles cuando sean llevados a cabo por abogados y procuradores y tengan por objeto recoger la información facilitada por sus clientes para el ejercicio de sus funciones». Es una excepción específica vinculada al ejercicio de la defensa y representación procesal."
+  },
+
+  /* ══ LO 3/2018 — TÍTULO III, CAP. I ══ */
+  {
+    p: "El artículo 11.2 de la LO 3/2018 regula la información básica que debe facilitarse al afectado cuando los datos se obtienen directamente de él. ¿Qué debe contener, como mínimo?",
+    ops: [
+      "Solo la identidad del responsable del tratamiento",
+      "La identidad del responsable y su representante, la finalidad del tratamiento y la posibilidad de ejercer los derechos de los artículos 15 a 22 del RGPD",
+      "Un listado exhaustivo de todas las cesiones de datos previstas, sin excepción",
+      "La política de privacidad completa del responsable en formato impreso"
+    ],
+    c: 1,
+    exp: "<strong>Respuesta correcta: B.</strong> El art. 11.2 LO 3/2018 establece que la información básica debe contener, al menos: a) la identidad del responsable y su representante; b) la finalidad del tratamiento; c) la posibilidad de ejercer los derechos establecidos en los arts. 15 a 22 del RGPD. Esto permite la llamada «información por capas»: información básica inmediata más enlace a información ampliada."
+  },
+  {
+    p: "Cuando los datos personales no hayan sido obtenidos directamente del afectado (art. 11.3 de la LO 3/2018), ¿qué información adicional debe incluirse respecto a la información básica general?",
+    ops: [
+      "El nombre y apellidos de la persona que cedió los datos al responsable",
+      "Las categorías de datos objeto de tratamiento y las fuentes de las que procedieran los datos",
+      "El precio o contraprestación pagada por la obtención de los datos, si la hubiere",
+      "El plazo máximo de conservación de los datos por parte del responsable"
+    ],
+    c: 1,
+    exp: "<strong>Respuesta correcta: B.</strong> El art. 11.3 LO 3/2018 establece que cuando los datos no proceden directamente del afectado, la información básica «incluirá también: a) Las categorías de datos objeto de tratamiento; b) Las fuentes de las que procedieran los datos». Esta información adicional es lógica: el afectado necesita saber de dónde proceden sus datos si no los proporcionó él mismo."
+  },
+
+  /* ══ LO 3/2018 — TÍTULO III, CAP. II ══ */
+  {
+    p: "¿Cómo pueden ejercerse los derechos reconocidos en los artículos 15 a 22 del RGPD, según el artículo 12.1 de la LO 3/2018?",
+    ops: [
+      "Únicamente de forma personal y presencial ante el responsable del tratamiento",
+      "Directamente o por medio de representante legal o voluntario",
+      "Solo a través de la Agencia Española de Protección de Datos como intermediaria",
+      "Exclusivamente por vía electrónica cuando el responsable disponga de sede electrónica"
+    ],
+    c: 1,
+    exp: "<strong>Respuesta correcta: B.</strong> El art. 12.1 LO 3/2018 establece que los derechos «podrán ejercerse directamente o por medio de representante legal o voluntario». Esta flexibilidad permite, por ejemplo, que un abogado u otra persona de confianza ejerza los derechos en nombre del afectado mediante representación voluntaria."
+  },
+  {
+    p: "Según el artículo 12.4 de la LO 3/2018, ¿a quién corresponde la carga de la prueba del cumplimiento del deber de responder a una solicitud de ejercicio de derechos?",
+    ops: [
+      "Al afectado, que debe demostrar que presentó la solicitud correctamente",
+      "Al responsable del tratamiento",
+      "A la Agencia Española de Protección de Datos, de oficio",
+      "Se reparte por igual entre el afectado y el responsable del tratamiento"
+    ],
+    c: 1,
+    exp: "<strong>Respuesta correcta: B.</strong> El art. 12.4 LO 3/2018 establece que «la prueba del cumplimiento del deber de responder a la solicitud de ejercicio de sus derechos formulado por el afectado recaerá sobre el responsable». Esta inversión de la carga de la prueba protege al afectado, que normalmente está en posición más débil frente al responsable del tratamiento."
+  },
+  {
+    p: "¿Pueden los titulares de la patria potestad ejercer los derechos de acceso, rectificación, cancelación u oposición en nombre de los menores de catorce años, según el artículo 12.6 de la LO 3/2018?",
+    ops: [
+      "No, estos derechos son personalísimos y solo puede ejercerlos el propio menor",
+      "Sí, en cualquier caso, los titulares de la patria potestad podrán ejercitar en nombre y representación de los menores de catorce años estos derechos",
+      "Solo pueden ejercerlos con autorización judicial previa en cada caso concreto",
+      "Solo pueden ejercer el derecho de acceso, no el resto de derechos del RGPD"
+    ],
+    c: 1,
+    exp: "<strong>Respuesta correcta: B.</strong> El art. 12.6 LO 3/2018 establece que «en cualquier caso, los titulares de la patria potestad podrán ejercitar en nombre y representación de los menores de catorce años los derechos de acceso, rectificación, cancelación, oposición o cualesquiera otros que pudieran corresponderles». Es coherente con que, por debajo de los 14 años, el consentimiento del menor no es válido por sí solo (art. 7.2)."
+  },
+  {
+    p: "¿Son gratuitas las actuaciones del responsable del tratamiento para atender las solicitudes de ejercicio de derechos, según el artículo 12.7 de la LO 3/2018?",
+    ops: [
+      "No, siempre conllevan el pago de una tasa administrativa fija",
+      "Sí, serán gratuitas, sin perjuicio de lo dispuesto en los arts. 12.5 y 15.3 del RGPD y en los apartados 3 y 4 del art. 13 de la propia ley orgánica",
+      "Son gratuitas únicamente para las personas físicas, no para las jurídicas",
+      "Solo son gratuitas si se ejercen por medios electrónicos"
+    ],
+    c: 1,
+    exp: "<strong>Respuesta correcta: B.</strong> El art. 12.7 LO 3/2018 establece que «serán gratuitas las actuaciones llevadas a cabo por el responsable del tratamiento para atender las solicitudes de ejercicio de estos derechos, sin perjuicio de lo dispuesto en los artículos 12.5 y 15.3 del Reglamento (UE) 2016/679 y en los apartados 3 y 4 del artículo 13 de esta ley orgánica» (que prevén excepciones en caso de solicitudes manifiestamente infundadas, excesivas o repetitivas)."
+  },
+  {
+    p: "El artículo 13.2 de la LO 3/2018 regula el derecho de acceso mediante sistema de acceso remoto. ¿Cuándo se entiende otorgado dicho derecho?",
+    ops: [
+      "Solo cuando el afectado confirme expresamente haber accedido al sistema y descargado los datos",
+      "Si el responsable facilita un sistema de acceso remoto, directo y seguro que garantice de modo permanente el acceso a la totalidad de los datos, comunicando al afectado el modo de acceder a dicho sistema",
+      "Cuando el responsable remita por correo postal una copia impresa de todos los datos tratados",
+      "Únicamente si el sistema de acceso remoto ha sido certificado previamente por la Agencia Española de Protección de Datos"
+    ],
+    c: 1,
+    exp: "<strong>Respuesta correcta: B.</strong> El art. 13.2 LO 3/2018 establece que «el derecho de acceso se entenderá otorgado si el responsable del tratamiento facilitara al afectado un sistema de acceso remoto, directo y seguro a los datos personales que garantice, de modo permanente, el acceso a su totalidad», bastando con comunicar al afectado el modo de acceder a dicho sistema."
+  },
+  {
+    p: "Según el artículo 13.3 de la LO 3/2018, ¿en qué plazo se puede considerar repetitivo el ejercicio del derecho de acceso?",
+    ops: [
+      "Más de una vez durante el plazo de tres meses, sin causa legítima",
+      "Más de una vez durante el plazo de seis meses, a menos que exista causa legítima para ello",
+      "Más de dos veces durante el plazo de un año, sin causa legítima",
+      "Más de una vez durante el mismo mes natural"
+    ],
+    c: 1,
+    exp: "<strong>Respuesta correcta: B.</strong> El art. 13.3 LO 3/2018 establece que «se podrá considerar repetitivo el ejercicio del derecho de acceso en más de una ocasión durante el plazo de seis meses, a menos que exista causa legítima para ello». Esta consideración permite al responsable, conforme al art. 12.5 RGPD, cobrar un canon o negarse a actuar en supuestos manifiestamente infundados o excesivos."
+  },
+  {
+    p: "¿Qué debe indicar el afectado al ejercer el derecho de rectificación, según el artículo 14 de la LO 3/2018?",
+    ops: [
+      "Únicamente la identificación del responsable del tratamiento",
+      "A qué datos se refiere y la corrección que haya de realizarse, acompañando, cuando sea preciso, documentación justificativa de la inexactitud",
+      "El motivo personal por el cual solicita la rectificación de sus datos",
+      "Una declaración jurada de la veracidad de los nuevos datos que pretende incorporar"
+    ],
+    c: 1,
+    exp: "<strong>Respuesta correcta: B.</strong> El art. 14 LO 3/2018 establece que el afectado «deberá indicar en su solicitud a qué datos se refiere y la corrección que haya de realizarse» y «deberá acompañar, cuando sea preciso, la documentación justificativa de la inexactitud o carácter incompleto de los datos objeto de tratamiento»."
+  },
+  {
+    p: "El artículo 15.2 de la LO 3/2018 prevé una excepción al derecho de supresión cuando este deriva del ejercicio del derecho de oposición a la mercadotecnia directa. ¿Cuál es?",
+    ops: [
+      "El responsable puede negarse completamente a suprimir los datos durante un año",
+      "El responsable podrá conservar los datos identificativos del afectado necesarios con el fin de impedir tratamientos futuros para fines de mercadotecnia directa",
+      "El responsable debe ceder los datos a un registro público de exclusión publicitaria antes de suprimirlos",
+      "El responsable puede exigir el pago de una indemnización antes de proceder a la supresión"
+    ],
+    c: 1,
+    exp: "<strong>Respuesta correcta: B.</strong> El art. 15.2 LO 3/2018 establece que «cuando la supresión derive del ejercicio del derecho de oposición con arreglo al artículo 21.2 del Reglamento (UE) 2016/679, el responsable podrá conservar los datos identificativos del afectado necesarios con el fin de impedir tratamientos futuros para fines de mercadotecnia directa». Es la llamada «lista Robinson» o de exclusión publicitaria."
+  },
+  {
+    p: "¿Debe constar de forma clara en los sistemas de información del responsable el hecho de que el tratamiento de datos personales está limitado, según el artículo 16.2 de la LO 3/2018?",
+    ops: [
+      "No es necesario, basta con la comunicación al afectado de la limitación acordada",
+      "Sí, el hecho de que el tratamiento esté limitado debe constar claramente en los sistemas de información del responsable",
+      "Solo es necesario si la limitación afecta a categorías especiales de datos",
+      "Solo es obligatorio cuando el responsable sea una Administración Pública"
+    ],
+    c: 1,
+    exp: "<strong>Respuesta correcta: B.</strong> El art. 16.2 LO 3/2018 establece que «el hecho de que el tratamiento de los datos personales esté limitado debe constar claramente en los sistemas de información del responsable». Esto evita que, por error, se siga tratando información cuyo tratamiento está formalmente restringido."
+  },
+
+  /* ══ PREGUNTAS DE SÍNTESIS Y DISTINCIÓN ══ */
+  {
+    p: "¿Cuál es la diferencia entre el régimen de silencio administrativo de la Ley 19/2013 (art. 20.4) y el de la reclamación ante el Consejo de Transparencia (art. 24.4)?",
+    ops: [
+      "Ambos son silencio positivo, pero con plazos distintos (uno y tres meses respectivamente)",
+      "Ambos regímenes son de silencio negativo (la solicitud o la reclamación se entienden desestimadas), pero con plazos distintos: un mes para la resolución inicial y tres meses para la reclamación",
+      "El primero es silencio negativo y el segundo es silencio positivo",
+      "El primero es silencio positivo y el segundo es silencio negativo"
+    ],
+    c: 1,
+    exp: "<strong>Respuesta correcta: B.</strong> Ambos regímenes son de silencio negativo: el art. 20.4 establece que transcurrido el plazo (un mes, ampliable a dos) sin resolución expresa «se entenderá que la solicitud ha sido desestimada»; el art. 24.4 establece que transcurridos tres meses sin resolución de la reclamación, «se entenderá desestimada». La diferencia está solo en los plazos aplicables a cada fase del procedimiento."
+  },
+  {
+    p: "¿En qué se diferencian los requisitos del consentimiento para datos generales (art. 6.1 LO 3/2018) y para categorías especiales relativas a ideología, afiliación sindical, religión, orientación sexual o creencias (art. 9.1 LO 3/2018)?",
+    ops: [
+      "No hay diferencia: el mismo consentimiento informado y libre basta en ambos casos",
+      "Para datos generales basta el consentimiento libre, específico, informado e inequívoco; para identificar ideología, afiliación sindical, religión, orientación sexual o creencias, el solo consentimiento del afectado no basta para levantar la prohibición del tratamiento",
+      "Para categorías especiales el consentimiento debe prestarse siempre por escrito ante notario",
+      "Para categorías especiales basta el consentimiento tácito si el afectado no se opone expresamente"
+    ],
+    c: 1,
+    exp: "<strong>Respuesta correcta: B.</strong> El art. 6.1 LO 3/2018 regula el consentimiento ordinario como manifestación libre, específica, informada e inequívoca. El art. 9.1 LO 3/2018 añade una garantía reforzada: cuando la finalidad principal del tratamiento sea identificar ideología, afiliación sindical, religión, orientación sexual, creencias u origen racial/étnico, «el solo consentimiento del afectado no bastará para levantar la prohibición del tratamiento», exigiéndose otro fundamento adicional de los previstos en el art. 9.2 RGPD."
+  },
+  {
+    p: "¿Cuál es la diferencia entre el plazo de reclamación ante el Consejo de Transparencia (art. 24.2 Ley 19/2013) y el plazo general de recurso contencioso-administrativo?",
+    ops: [
+      "Ambos plazos son idénticos: dos meses desde la notificación del acto",
+      "El plazo de reclamación ante el Consejo es de un mes, más breve que el plazo general de dos meses del recurso contencioso-administrativo",
+      "El plazo de reclamación ante el Consejo es de tres meses, más amplio que el del recurso contencioso",
+      "No existe plazo específico para la reclamación ante el Consejo de Transparencia"
+    ],
+    c: 1,
+    exp: "<strong>Respuesta correcta: B.</strong> El art. 24.2 Ley 19/2013 fija un plazo de un mes para la reclamación potestativa ante el Consejo de Transparencia y Buen Gobierno. Este plazo es más breve que el plazo general de dos meses para interponer recurso contencioso-administrativo directo. La reclamación ante el Consejo actúa, según el art. 23.1, como sustitutiva de los recursos administrativos ordinarios."
+  },
+  {
+    p: "¿Cuál es la diferencia esencial entre las causas de inadmisión del artículo 18.1 de la Ley 19/2013 y los límites al derecho de acceso del artículo 14.1?",
+    ops: [
+      "No hay diferencia conceptual: ambas figuras producen el mismo efecto jurídico de denegación del acceso",
+      "Las causas de inadmisión (art. 18) permiten rechazar la solicitud sin entrar a valorar el contenido de la información por razones formales o de naturaleza de la información (borradores, repetitividad); los límites (art. 14) exigen ponderación del contenido y de los intereses en juego para denegar el fondo",
+      "Las causas de inadmisión solo se aplican a personas jurídicas; los límites del art. 14 solo a personas físicas",
+      "Los límites del art. 14 son siempre temporales; las causas de inadmisión del art. 18 son permanentes"
+    ],
+    c: 1,
+    exp: "<strong>Respuesta correcta: B.</strong> Las causas de inadmisión (art. 18) operan en una fase de admisión formal, atendiendo a la naturaleza de la información solicitada (en elaboración, auxiliar, repetitiva) sin entrar al fondo del asunto. Los límites del art. 14 requieren una ponderación sustantiva, justificada y proporcionada, sobre el contenido concreto de la información y los bienes jurídicos que pudieran verse afectados por su divulgación."
+  }
+];
+
+/* ── LÓGICA ── */
+let orden = [], respondidas = 0, aciertos = 0, errores = 0;
+const TOTAL = BANCO.length;
+
+document.getElementById('totalLabel').textContent = '📋 ' + TOTAL + ' preguntas';
+document.getElementById('barraNum').textContent = '0 / ' + TOTAL;
+
+function mezclar(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function actualizarBarra() {
+  document.getElementById('barraFill').style.width = ((respondidas / TOTAL) * 100) + '%';
+  document.getElementById('barraNum').textContent = respondidas + ' / ' + TOTAL;
+  document.getElementById('scoreOk').textContent = '✓ ' + aciertos;
+  document.getElementById('scoreKo').textContent = '✗ ' + errores;
+}
+
+function construirPreguntas() {
+  orden = mezclar([...Array(TOTAL).keys()]);
+  const main = document.getElementById('mainContent');
+  main.innerHTML = '';
+  const letras = ['A', 'B', 'C', 'D'];
+
+  orden.forEach((idx, pos) => {
+    const q = BANCO[idx];
+    const opsOrden = mezclar([0, 1, 2, 3]);
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.id = 'card-' + pos;
+
+    const numDiv = document.createElement('div');
+    numDiv.className = 'card-num';
+    numDiv.textContent = 'Pregunta ' + (pos + 1);
+
+    const pregDiv = document.createElement('div');
+    pregDiv.className = 'card-pregunta';
+    pregDiv.textContent = q.p;
+
+    const opcionesDiv = document.createElement('div');
+    opcionesDiv.className = 'opciones';
+
+    opsOrden.forEach((opIdx, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'opcion';
+      btn.dataset.correcto = (opIdx === q.c) ? '1' : '0';
+      btn.dataset.pos = pos;
+      btn.innerHTML = '<span class="letra">' + letras[i] + '</span><span>' + q.ops[opIdx] + '</span>';
+      btn.addEventListener('click', onOpcionClick);
+      opcionesDiv.appendChild(btn);
+    });
+
+    const expDiv = document.createElement('div');
+    expDiv.className = 'explicacion';
+    expDiv.id = 'exp-' + pos;
+    expDiv.innerHTML = q.exp;
+
+    card.appendChild(numDiv);
+    card.appendChild(pregDiv);
+    card.appendChild(opcionesDiv);
+    card.appendChild(expDiv);
+    main.appendChild(card);
+  });
+
+  const res = document.createElement('div');
+  res.className = 'resultado';
+  res.id = 'resultado';
+  res.innerHTML = `
+    <div class="resultado-eyebrow">Resultado final</div>
+    <h2>Test completado</h2>
+    <div class="resultado-nota"><span id="rNota">-</span><span style="font-size:1.5rem;color:var(--texto-suave)">/10</span></div>
+    <div id="rBadge" class="calif-badge"></div>
+    <div class="stats">
+      <div class="stat"><div class="stat-num" id="rOk" style="color:var(--verde)">-</div><div class="stat-lab">Correctas</div></div>
+      <div class="stat"><div class="stat-num" id="rKo" style="color:var(--rojo)">-</div><div class="stat-lab">Erróneas</div></div>
+      <div class="stat"><div class="stat-num" id="rPct">-</div><div class="stat-lab">% Acierto</div></div>
+    </div>
+    <p class="resultado-hint">Revisa las explicaciones en cada pregunta para reforzar los conceptos.</p>
+    <button class="btn btn-naranja" onclick="reiniciar()">🔄 Nuevo intento</button>
+  `;
+  main.appendChild(res);
+}
+
+function onOpcionClick(e) {
+  const btn = e.currentTarget;
+  const pos = parseInt(btn.dataset.pos);
+  const card = document.getElementById('card-' + pos);
+  card.querySelectorAll('.opcion').forEach(b => {
+    b.disabled = true;
+    if (b.dataset.correcto === '1') b.classList.add('correcta');
+    else if (b === btn) b.classList.add('incorrecta');
+  });
+  document.getElementById('exp-' + pos).classList.add('visible');
+  if (btn.dataset.correcto === '1') aciertos++; else errores++;
+  respondidas++;
+  actualizarBarra();
+  if (respondidas === TOTAL) mostrarResultado();
+}
+
+function mostrarResultado() {
+  const nota = ((aciertos / TOTAL) * 10).toFixed(1);
+  const pct = Math.round((aciertos / TOTAL) * 100);
+  let badge = '', color = '';
+  if (pct >= 90)      { badge = '🏆 Sobresaliente'; color = '#166534'; }
+  else if (pct >= 70) { badge = '✅ Notable';        color = '#1d4ed8'; }
+  else if (pct >= 50) { badge = '⚠️ Aprobado';      color = '#92400e'; }
+  else                { badge = '❌ Suspenso';       color = '#991b1b'; }
+  document.getElementById('rNota').textContent = nota;
+  document.getElementById('rOk').textContent = aciertos;
+  document.getElementById('rKo').textContent = errores;
+  document.getElementById('rPct').textContent = pct + '%';
+  const badgeEl = document.getElementById('rBadge');
+  badgeEl.textContent = badge;
+  badgeEl.style.cssText += `;background:${color}22;color:${color};border:1px solid ${color}44`;
+  const res = document.getElementById('resultado');
+  res.classList.add('visible');
+  setTimeout(() => res.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+}
+
+function reiniciar() {
+  respondidas = 0; aciertos = 0; errores = 0;
+  actualizarBarra();
+  construirPreguntas();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+construirPreguntas();
+</script>
+</body>
+</html>
